@@ -216,7 +216,7 @@ def add_cart(request, product_id):
                 variation_value__iexact=size
             )
             product_variations.append(variation)
-            
+        
             variation = Variation.objects.get(
                 product=product,
                 variation_category__iexact='color',
