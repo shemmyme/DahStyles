@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h8=%vp)ud_f3%xgg1^yo0n)t^v9+ykpzy*9wtw1#&gfvw=l*47'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,13 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'userhome',
     'admin_side',
-    'order',
-    
-    
-  
-    
-    
-    
+    'order', 
 ]
 
 
@@ -95,10 +90,9 @@ WSGI_APPLICATION = 'DahStyles.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'database',
-        'USER': 'admin',
-        'PASSWORD': '1234',
-        # 'HOST': 'localhost',
+        'NAME': config('db_name'),
+        'USER': config('db_user'),
+        'PASSWORD': config('db_pass'),
     }
 }
 
@@ -156,15 +150,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MEDIA_ROOT = BASE_DIR / '/static/img'
 MEDIA_URL = 'media/'
 
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST='smtp.gmail.com'
-EMAIL_PORT=587
-EMAIL_HOST_USER='shemim313@gmail.com'
-EMAIL_HOST_PASSWORD='efxevtuaefcapggv'
-EMAIL_USE_TLS=True
+
+EMAIL_BACKEND=config('EMAIL_BACKEND')
+EMAIL_HOST=config('EMAIL_HOST')
+EMAIL_PORT=config('EMAIL_PORT',cast=int)
+EMAIL_HOST_USER=config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD=config('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS=config('EMAIL_USE_TLS',cast=bool)
 
 
 # Razorpay credentials
-RAZORPAY_KEY = 'rzp_test_zRJ6WEUgRAHMkw'
-RAZORPAY_SECRET_KEY = 'XOjpwOPGW4fIEAPftFiy8Eyk'
-
+RAZORPAY_KEY = config('RAZORPAY_KEY')
+RAZORPAY_SECRET_KEY = config('RAZORPAY_SECRET_KEY')

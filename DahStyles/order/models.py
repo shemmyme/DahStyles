@@ -43,6 +43,7 @@ class Order(models.Model):
     order_total = models.FloatField()
     order_discount = models.FloatField(default=0)
     paid_amount = models.FloatField()
+    tax = models.PositiveIntegerField(default=0)
     # tax = models.FloatField()
     payment = models.ForeignKey(Payment,on_delete=models.SET_NULL,blank=True,null=True)
     status = models.CharField(max_length=50,choices=STATUS,default='Order Confirmed')

@@ -17,6 +17,24 @@ class Cart(models.Model):
     class Meta:
         db_table = 'cart'
         ordering = ['date_added']
+        
+        
+    def get_cart_total(self):
+        cart_items = CartItem.objects.filter(cart=self.id)
+        price = []
+        for cart_item in cart_items:
+            quantity = cart_item.quantity
+            price.append(cart_item.product.price * quantity)
+        
+        return sum(price)
+        
+    def get_tax(self):
+        return round(0.05 * self.get_cart_total(), 2)
+    
+    
+    def get_grand_total(self):
+        total = self.get_cart_total() + self.get_tax()
+        return total
 
     def _str_(self):
         return self.cart_id
@@ -40,6 +58,9 @@ class CartItem(models.Model):
     def _unicode_(self):
         if self.product:
             return self.product.product_name
+        
+    def __str__(self):
+        return self.product.product_name
 
 
 class City(models.Model):

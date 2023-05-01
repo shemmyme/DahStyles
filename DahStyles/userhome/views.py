@@ -210,6 +210,11 @@ def add_cart(request, product_id):
             size = request.GET.get('size')
             color = request.GET.get('color')
             
+            print('======================================')
+            print(size)
+            print(color)
+            print('=======================================')
+            
             variation = Variation.objects.get(
                 product=product,
                 variation_category__iexact='size',
@@ -438,9 +443,9 @@ def shop(request, category_slug=None):
     min_price = request.GET.get('min_price')
     max_price = request.GET.get('max_price')
     if min_price:
-        product = product.filter(price__gte=float(min_price.replace('$', '')))
+        product = product.filter(price__gte=float(min_price.replace('₹', '')))
     if max_price:
-        product = product.filter(price__lte=float(max_price.replace('$', '')))
+        product = product.filter(price__lte=float(max_price.replace('₹', '')))
 
     # Handle sorting parameter
     sort_param = request.GET.get('sort')
@@ -577,21 +582,21 @@ def checkout(request, total=0, quantity=0, cart_items=None):
     
     try:
         if request.user.is_authenticated:
+            cart = Cart.objects.get(user=request.user)
             cart_items = CartItem.objects.filter(user=request.user, is_active=True).order_by('id')
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart, is_active=True).order_by('id')
       
-        for cart_item in cart_items:
-            product_price = int(cart_item.product.price)
-            total += product_price * int(cart_item.quantity)
-            quantity += cart_item.quantity
-            cart_item.price = product_price
-            cart_item.save()
+        # for cart_item in cart_items:
+        #     product_price = int(cart_item.product.price)
+        #     total += product_price * int(cart_item.quantity)
+        #     quantity += cart_item.quantity
+        #     cart_item.price = product_price
+        #     cart_item.save()
         
-        # tax = (2 * total) / 100
-        # grand_total = total + tax
-        # grand_total = format(grand_total, '.2f')
+        total = cart.get_cart_total()
+        
             
     except ObjectDoesNotExist:
         pass
@@ -599,11 +604,10 @@ def checkout(request, total=0, quantity=0, cart_items=None):
   
 
     context = {
-        'total': total,
+        'total' : total,
         'quantity': quantity,
+        'cart': cart,
         'cart_items': cart_items,
-        'tax': tax,
-        'grand_total': grand_total,
         'address': address,
         'city' : city,
         'state' :state,

@@ -74,22 +74,32 @@
                     <tr>
                       <th colspan="2">{{item.product.product_name}} <span></span></th>
                       <th>x{{item.quantity}}</th>
-                      <th> <span>Rs. {{item.product.price}}</span></th>
+                      <th> <span>$ {{item.product.price}}</span></th>
                     </tr>
                     {% endfor %}
                     <!-- <tr>
                   
                         <th colspan="3"><h4>Subtotal</h4></th>
-                        <th> <span>Rs. {{total}}</span></th>
+                        <th> <span>$. {{total}}</span></th>
                       </tr> -->
                       
                    
                 </tbody>
                 <tfoot>
                     <tfoot>
+                      <tr>
+                        <th scope="col" colspan="3"><h6>Sub total</h6></th>
+                        <th scope="col">${{cart.get_cart_total}}</th>
+                      </tr>
+
+                      <tr>
+                        <th scope="col" colspan="3"><h6>Payable Tax</h6></th>
+                        <th scope="col">${{cart.get_tax}}</th>
+                      </tr>
+
                         <tr>
                           <th scope="col" colspan="3"><h4>Payable Amount</h4></th>
-                          <th scope="col">Rs. {{total}}</th>
+                          <th scope="col">${{cart.get_grand_total}}</th>
                         </tr>
                       </tfoot>
                     

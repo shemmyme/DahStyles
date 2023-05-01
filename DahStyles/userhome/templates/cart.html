@@ -62,7 +62,7 @@
                                             </div> -->
                                         </div>
                                     </td>
-                                    <td class="cart__price">₹ {{i.product.price}}</td>
+                                    <td class="cart__price">$ {{i.product.price}}</td>
                                     
                                     <td class="cart__quantity">
                                         <div class="input-group">
@@ -71,7 +71,22 @@
                                           </div>
                                           <input name="quantity" type="number" value="{{i.quantity}}" min="0" max="100" style="text-align: center;">
                                           <div class="input-group-append">
-                                            <form action="{% url 'add_cart' i.product.id %}?{% if i.variations.all %}{% for variation in i.variations.all %}{{ variation.variation_category }}={{ variation.variation_value }}{% if not forloop.last %}&{% endif %}{% endfor %}{% endif %}">
+                                            
+                                            <form action="{% url 'add_cart' i.product.id %}" method="post"  >
+                                                {% csrf_token %}
+                                               <div style="display:none;">
+                                                {% if i.variations %}
+                                                {% for variation in i.variations.all %}
+                                                    <div class="form-group">
+                                                        <select class="form-control" id="color-dropdown" name="{{ variation.variation_category }}" required>
+                                                        <option selected  value="{{ variation.variation_value }}">{{ variation.variation_value }}</option>
+                                                        </select>
+                                                    </div>
+                                                {% endfor %}
+                                                {% endif %}
+                                               </div>
+
+                                                        
                                                 <button type="submit" class="btn btn-outline-secondary">
                                                     <i class="fa fa-plus"></i>
                                                 </button>       
@@ -82,12 +97,12 @@
                                         
                                       </td>
                                     
-                                    <td class="cart__total">₹ {{i.sub_total}}</td>
+                                    <td class="cart__total">$ {{i.sub_total}}</td>
                                     <td class="cart__close"><a href="{% url 'remove_cart' i.product.id i.id  %} "> <span class="icon_close"></span></a></td>
     
                                 </tr>
                                 <tr>
-                                    <td><a href="{% url 'add_cart' i.product.id %}?size=10">{% url 'add_cart' i.product.id %}?{% if i.variations.all %}{% for variation in i.variations.all %}{{ variation.variation_category }}={{ variation.variation_value }}&{% endfor %}{% endif %}</a></td>
+                                    <td><a href="{% url 'add_cart' i.product.id %}?{% if i.variations.all %}{% for variation in i.variations.all %}{{ variation.variation_category }}={{ variation.variation_value }}&{% endfor %}{% endif %}"></a></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -119,10 +134,10 @@
                     <div class="cart_total_procced">
                         <h6>Cart total</h6>
                         <ul>
-                            <li>Subtotal <span>₹ {{total}}</span></li>
-                            <li>Tax <span>₹ {{tax}}</span></li>
+                            <li>Subtotal <span>$ {{total}}</span></li>
+                            <li>Tax <span>$ {{tax}}</span></li>
     
-                            <li>Total <span>₹ {{grand_total}}</span></li>
+                            <li>Total <span>$ {{grand_total}}</span></li>
                         </ul>
                         <a href="{% url 'checkout' %}" class="primary-btn">Proceed to checkout</a>
                     </div>

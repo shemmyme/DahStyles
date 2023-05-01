@@ -61,9 +61,11 @@ def checkout(request, total=0, quantity=0, cart_items=None):
 
 def confirmation(request):
     try:
+        cart = Cart.objects.get(user=request.user)
         cart_items = CartItem.objects.filter(user=request.user)
         newAddress_id = request.POST.get('selected_addresses')
-        total = request.POST.get('total')
+        total = cart.get_grand_total()
+        # total = 'zz'
         grand_total = request.POST.get('grand_total')
         amountToBePaid = request.POST.get('amountToBePaid')
         couponCode = request.POST.get('couponCode')
@@ -81,27 +83,29 @@ def confirmation(request):
     val =  int(total * 100)
     print('val = ',val)
     
-    client = razorpay.Client(auth=(settings.RAZORPAY_KEY, settings.RAZORPAY_SECRET_KEY))
-    payment = client.order.create({'amount': int(total)*100, 'currency': 'INR', 'payment_capture': 1})
+    try:
+        client = razorpay.Client(auth=(settings.RAZORPAY_KEY, settings.RAZORPAY_SECRET_KEY))
+        payment = client.order.create({'amount': int(total)*100, 'currency': 'INR', 'payment_capture': 1})
 
-    for cart_item in cart_items:
-        cart_item.razor_pay_order_id = payment['id']
-        cart_item.save()
+        for cart_item in cart_items:
+            cart_item.razor_pay_order_id = payment['id']
+            cart_item.save()
 
-    print('*****')
-    print(payment)
+        print('*****')
+        print(payment)
 
-    context = {
-        'cart_items': cart_items,
-        'addressSelected': address,
-        'couponDiscount': couponDiscount,
-        'couponCode': couponCode,
-        'grand_total': grand_total,
-        'amountToBePaid': amountToBePaid,
-        'total': total,
-        'payment': payment,
-    }
-    return render(request, 'confirm.html', context)
+        context = {
+            'cart' : cart,
+            'cart_items': cart_items,
+            'addressSelected': address,
+            'couponDiscount': couponDiscount,
+            'couponCode': couponCode,
+            'amountToBePaid': amountToBePaid,
+            'payment': payment,
+        }
+        return render(request, 'confirm.html', context)
+    except:
+        return HttpResponse('Some payment informations you provided are not correct')
 
 
 def calculateCartTotal(request):
@@ -116,7 +120,7 @@ def calculateCartTotal(request):
 
       for cart_item in cart_items:
          total    += (cart_item.product.price * cart_item.quantity)
-         tax = 70
+         tax = (5 * total) / 100
          grand_total = tax + total
    return total, tax, grand_total
 
@@ -166,17 +170,20 @@ def placeOrder(request):
                     newOrder.paid_amount = amountToBePaid
                     instance.used = True
                     newOrder.paid_amount = amountToBePaid
+                    newOrder.tax = tax
                     newPayment.amount_paid = amountToBePaid
                     instance.save()
                 else:
                     msg='This coupon is only applicable for orders more than ₹'+ str(instance.coupon.min_value)+ '\- only!'
             else:
                 newOrder.paid_amount = grand_total
+                newOrder.tax = tax
                 newPayment.amount_paid = grand_total
                 newOrder.discount=0
                 msg = 'Coupon is not valid'
          else:
             newOrder.paid_amount = grand_total
+            newOrder.tax = tax
             newPayment.amount_paid = grand_total
             msg = 'Coupon not Added'
          newPayment.save()
@@ -322,8 +329,8 @@ def razorPayCheck(request):
    if cart_items:
       for cart_item in cart_items:
          total+=(cart_item.product.price*cart_item.quantity)
-      tax=50
-      grand_total=total+tax
+      tax = (5 * total) / 100
+      grand_total=int(total+tax)
       grand_total = round(grand_total,2)
       amountToBePaid = grand_total
       print()
